@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact List</title>
+</head>
+<body>
+    <h1>Contact List</h1>
+    
+    <form id="contactForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email"><br><br>
+        
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="text" id="phoneNumber" name="phoneNumber"><br><br>
+        
+        <button type="submit" onclick="addContact()">Add Contact</button>
+    </form>
+
+    <div id="contactList"></div>
+
+    <script>
+        function addContact() {
+            const contactForm = document.getElementById('contactForm');
+            const formData = new FormData(contactForm);
+            
+            fetch('/contacts/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log('Contact added:', data);
+                getContacts();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getContacts() {
+            fetch('/contacts')
+            .then(response => response.json())
+            .then(data => {
+                const contactList = document.getElementById('contactList');
+                contactList.innerHTML = '';
+
+                data.forEach(contact => {
+                    const contactInfo = document.createElement('p');
+                    contactInfo.textContent = `Name: ${contact.name}, Email: ${contact.email}, Phone Number: ${contact.phoneNumber}`;
+                    contactList.appendChild(contactInfo);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // 页面加载时获取联系人列表
+        getContacts();
+    </script>
+</body>
+</html>
